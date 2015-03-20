@@ -1,0 +1,19 @@
+{
+  "name": "book-nodejs-in-action-season-2-examples",
+  "version": "1.0.0",
+  "description": "《Node.js实战 第二季》示例代码",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leizongmin/book-nodejs-in-action-season-2.git"
+  },
+  "author": "Zongmin Lei <leizongmin@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/leizongmin/book-nodejs-in-action-season-2/issues"
+  },
+  "homepage": "https://github.com/leizongmin/book-nodejs-in-action-season-2"
+}
