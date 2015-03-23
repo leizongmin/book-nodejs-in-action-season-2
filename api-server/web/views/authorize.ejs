@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>授权应用</title>
+</head>
+<style>
+.oauth-box {
+  width: 400px;
+  border: 1px solid #AAA;
+  background-color: #EEE;
+  padding: 8px 20px;
+  margin: auto;
+}
+.text-muted {
+  color: #888;
+  font-size: 81.5%;
+}
+.btn-primary {
+  background-color: #0051FF;
+  border: 1px solid #AAA;
+  font-size: 100%;
+  color: #FFF;
+  padding: 4px 20px;
+  cursor: pointer;
+}
+</style>
+<body>
+  <div class="oauth-box">
+    <form method="post">
+      <h3>应用授权</h3>
+      <hr>
+      <p><%= login_user %>，你确定要授权给应用 <strong><%= client.name %></strong> 吗？</p>
+      <p class="text-muted">应用简介：<%= client.description %></p>
+      <hr>
+      <button type="submit" class="btn-primary">确定</button>
+    </form>
+  </div>
+</body>
+</html>
