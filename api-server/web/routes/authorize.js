@@ -77,6 +77,11 @@ exports.getAccessToken = function (req, res, next) {
     database.generateAccessToken(userId, client_id, function (err, accessToken) {
       if (err) return next(err);
 
+      // 生成access_token后需要删除旧的authorization_code
+      database.deleteAuthorizationCode(code, function (err) {
+        if (err) console.error(err);
+      });
+
       res.apiSuccess({
         access_token: accessToken,
         expires_in: 3600 * 24  // access_token的有效期为1天

@@ -59,6 +59,12 @@ exports.verifyAuthorizationCode = function (code, clientId, clientSecret, redire
   });
 };
 
+// 删除授权Code
+exports.deleteAuthorizationCode = function (code, callback) {
+  delete authorizationCode[code];
+  callback(null, code);
+};
+
 
 //------------------------------------------------------------------------------
 var accessToken = [];
