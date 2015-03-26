@@ -9,31 +9,82 @@ var database = require('../lib/database');
 var utils = require('../lib/utils');
 
 
-// 显示确认界面
-exports.showAppInfo = function (req, res, next) {
-  if (!req.query.client_id) return next('缺少参数 `client_id`');
-  if (!req.query.redirect_url) return next('缺少参数 `redirect_url`');
+// 检查参数
+exports.checkAuthorizeParams = function (req, res, next) {
+  // 检查参数
+  if (!req.query.client_id) {
+    return next(utils.missingParameterError('client_id'));
+  }
+  if (!req.query.redirect_uri) {
+    return next(utils.missingParameterError('redirect_uri'));
+  }
 
-  database.getClientInfoById(req.query.client_id, function (err, ret) {
+  // 验证client_id是否正确，并查询应用的详细信息
+  database.getAppInfo(req.query.client_id, function (err, ret) {
     if (err) return next(err);
 
-    res.locals.client = ret;
-    res.locals.client_id = req.query.client_id;
-    res.locals.redirect_url = req.query.redirect_url;
-    res.locals.login_user = req.loginUserId;
-    res.render('authorize');
+    req.appInfo = ret;
+
+    // 验证redirect_uri是否符合该应用设置的回调地址规则
+    database.verifyAppRedirectUri(req.query.client_id, req.query.redirect_uri, function (err, ok) {
+      if (err) return next(err);
+      if (!ok) {
+        return next(utils.redirectUriNotMatchError(req.query.redirect_uri));
+      }
+
+      next();
+    });
   });
+};
+
+// 显示确认界面
+exports.showAppInfo = function (req, res, next) {
+  res.locals.loginUserId = req.loginUserId;
+  res.locals.appInfo = req.appInfo;
+  res.render('authorize');
 };
 
 // 确认授权
 exports.confirmApp = function (req, res, next) {
-  if (!req.query.client_id) return next('缺少参数 `client_id`');
-  if (!req.query.redirect_url) return next('缺少参数 `redirect_url`');
-
-  database.generateGrantCode(req.query.client_id, req.loginUserId, function (err, ret) {
+  // 生成authorization_code
+  database.generateAuthorizationCode(req.loginUserId, req.query.client_id, req.query.redirect_uri, function (err, ret) {
     if (err) return next(err);
 
-    res.redirect(utils.addQueryParamsToUrl(req.query.redirect_url, {code: ret}));
+    // 跳转回来源应用
+    res.redirect(utils.addQueryParamsToUrl(req.query.redirect_uri, {
+      code: ret
+    }));
   });
 };
 
+// 获取access_token
+exports.getAccessToken = function (req, res, next) {
+  // 检查参数
+  if (!req.query.client_id) {
+    return next(utisl.missingParameterError('client_id'));
+  }
+  if (!req.query.client_secret) {
+    return next(utils.missingParameterError('client_secret'));
+  }
+  if (!req.query.redirect_uri) {
+    return next(utils.missingParameterError('redirect_uri'));
+  }
+  if (!req.query.code) {
+    return next(utils.missingParameterError('code'));
+  }
+
+  // 验证authorization_code
+  database.verifyAuthorizationCode(req.body.code, req.body.client_id, req.body.client_secret, req.body.redirect_uri, function (err, userId) {
+    if (err) return next(err);
+
+    // 生成access_token
+    database.generateAccessToken(userId, req.query.client_id, function (err, accessToken) {
+      if (err) return next(err);
+
+      res.apiSuccess({
+        access_token: accessToken,
+        expires_in: 3600 * 24  // access_token的有效期为1天
+      });
+    });
+  });
+};

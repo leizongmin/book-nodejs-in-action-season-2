@@ -11,7 +11,8 @@ module.exports = function (app) {
   var authorize = require('./authorize');
 
 
-  app.get('/oauth/authorize', middlewares.ensureLogin, authorize.showAppInfo);
-  app.post('/oauth/authorize', middlewares.ensureLogin, middlewares.postBody, authorize.confirmApp);
+  app.get('/OAuth2/authorize', middlewares.ensureLogin, authorize.checkAuthorizeParams, authorize.showAppInfo);
+  app.post('/OAuth2/authorize', middlewares.ensureLogin, middlewares.postBody, authorize.checkAuthorizeParams, authorize.confirmApp);
+  app.post('/OAuth2/access_token', middlewares.postBody, authorize.getAccessToken);
 
 };

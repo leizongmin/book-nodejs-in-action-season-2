@@ -30,8 +30,8 @@
     <form method="post">
       <h3>应用授权</h3>
       <hr>
-      <p><%= login_user %>，你确定要授权给应用 <strong><%= client.name %></strong> 吗？</p>
-      <p class="text-muted">应用简介：<%= client.description %></p>
+      <p><%= loginUserId %>，你确定要授权给应用 <strong><%= appInfo.name %></strong> 吗？</p>
+      <p class="text-muted">应用简介：<%= appInfo.description %></p>
       <hr>
       <button type="submit" class="btn-primary">确定</button>
     </form>
