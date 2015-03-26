@@ -60,25 +60,21 @@ exports.confirmApp = function (req, res, next) {
 // 获取access_token
 exports.getAccessToken = function (req, res, next) {
   // 检查参数
-  if (!req.query.client_id) {
-    return next(utisl.missingParameterError('client_id'));
-  }
-  if (!req.query.client_secret) {
-    return next(utils.missingParameterError('client_secret'));
-  }
-  if (!req.query.redirect_uri) {
-    return next(utils.missingParameterError('redirect_uri'));
-  }
-  if (!req.query.code) {
-    return next(utils.missingParameterError('code'));
-  }
+  var client_id = req.body.client_id || req.query.client_id;
+  var client_secret = req.body.client_secret || req.query.client_secret;
+  var redirect_uri = req.body.redirect_uri || req.query.redirect_uri;
+  var code = req.body.code || req.query.code;
+  if (!client_id) return next(utils.missingParameterError('client_id'));
+  if (!client_secret) return next(utils.missingParameterError('client_secret'));
+  if (!redirect_uri) return next(utils.missingParameterError('redirect_uri'));
+  if (!code) return next(utils.missingParameterError('code'));
 
   // 验证authorization_code
-  database.verifyAuthorizationCode(req.body.code, req.body.client_id, req.body.client_secret, req.body.redirect_uri, function (err, userId) {
+  database.verifyAuthorizationCode(code, client_id, client_secret, redirect_uri, function (err, userId) {
     if (err) return next(err);
 
     // 生成access_token
-    database.generateAccessToken(userId, req.query.client_id, function (err, accessToken) {
+    database.generateAccessToken(userId, client_id, function (err, accessToken) {
       if (err) return next(err);
 
       res.apiSuccess({

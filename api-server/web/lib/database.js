@@ -14,7 +14,7 @@ exports.getAppInfo = function (id, callback) {
     id: id,
     name: 'Node.js实战',
     description: '专注Node.js实战二十年',
-    secret: 'ooxxxxoo',
+    secret: 'xffcncgmveu6slxg',
     redirectUri: 'http://127.0.0.1:3000/auth/callback'
   });
 };
