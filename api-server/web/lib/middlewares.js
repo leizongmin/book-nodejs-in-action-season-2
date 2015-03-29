@@ -10,7 +10,7 @@ var redis = require('redis');
 var bodyParser = require('body-parser');
 var connect = require('connect');
 var multipart = require('connect-multiparty');
-var xml = require('xml');
+var js2xmlparser = require('js2xmlparser');
 var utils = require('./utils');
 var database = require('./database');
 
@@ -36,6 +36,7 @@ exports.extendAPIOutput = function (req, res, next) {
 
   // 输出数据
   function output (data) {
+
     // 取得请求的数据格式
     var type = path.extname(parseUrl(req.url).pathname);
     switch (type) {
@@ -67,7 +68,7 @@ exports.extendAPIOutput = function (req, res, next) {
   // 输出XML格式数据
   res.xml = function (data) {
     res.setHeader('content-type', 'text/xml');
-    res.end(xml(data, '\t'));
+    res.end(js2xmlparser('data', data));
   };
 
   next();

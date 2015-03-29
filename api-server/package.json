@@ -18,10 +18,10 @@
     "ejs": "^2.3.1",
     "express": "^4.12.3",
     "faker": "^2.1.2",
+    "js2xmlparser": "^0.1.9",
     "lei-utils": "^1.0.5",
     "redis": "^0.12.1",
     "sails-disk": "^0.10.7",
-    "waterline": "^0.10.18",
-    "xml": "^1.0.0"
+    "waterline": "^0.10.18"
   }
 }
