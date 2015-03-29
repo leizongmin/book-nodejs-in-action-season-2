@@ -7,6 +7,7 @@
 module.exports = function (app) {
 
   var middlewares = require('../lib/middlewares');
+  var utils = require('../lib/utils');
 
 
   // OAuth2授权
@@ -17,7 +18,20 @@ module.exports = function (app) {
 
   // 模拟客户端获得授权码
   var client = require('./client');
-  app.get('/auth', client.requestAuth);
-  app.get('/auth/callback', client.authCallback);
+  app.get('/example/auth', client.requestAuth);
+  app.get('/example/auth/callback', client.authCallback);
+  app.get('/example', client.example);
+
+  // 提供的API列表
+  var api = require('./api');
+  function generateHourRateLimiterKey (api) {
+    return function (source) {
+      return utils.md5(api, source) + ':' + utils.date('YmdH');
+    };
+  }
+  app.get('/api/v1/articles.*',
+    middlewares.verifyAccessToken,
+    middlewares.generateRateLimiter(generateHourRateLimiterKey('/api/v1/articles'), 10000),
+    api.getArticles);
 
 };

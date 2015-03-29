@@ -15,7 +15,7 @@ exports.getAppInfo = function (id, callback) {
     name: 'Node.js实战',
     description: '专注Node.js实战二十年',
     secret: 'xffcncgmveu6slxg',
-    redirectUri: 'http://127.0.0.1:3000/auth/callback'
+    redirectUri: 'http://127.0.0.1:3000/example/auth/callback'
   });
 };
 
@@ -32,12 +32,12 @@ exports.verifyAppRedirectUri = function (clientId, url, callback) {
 
 
 //------------------------------------------------------------------------------
-var authorizationCode = {};
+var dataAuthorizationCode = {};
 
 // 生成授权Code
 exports.generateAuthorizationCode = function (userId, clientId, redirectUri, callback) {
   var code = utils.randomString(20);
-  authorizationCode[code] = {
+  dataAuthorizationCode[code] = {
     clientId: clientId,
     userId: userId
   };
@@ -46,7 +46,7 @@ exports.generateAuthorizationCode = function (userId, clientId, redirectUri, cal
 
 // 验证授权码是否正确
 exports.verifyAuthorizationCode = function (code, clientId, clientSecret, redirectUri, callback) {
-  var info = authorizationCode[code];
+  var info = dataAuthorizationCode[code];
   if (!info) return callback(utils.invalidParameterError('code'));
   if (info.clientId !== clientId) return callback(utils.invalidParameterError('code'));
 
@@ -61,18 +61,18 @@ exports.verifyAuthorizationCode = function (code, clientId, clientSecret, redire
 
 // 删除授权Code
 exports.deleteAuthorizationCode = function (code, callback) {
-  delete authorizationCode[code];
+  delete dataAuthorizationCode[code];
   callback(null, code);
 };
 
 
 //------------------------------------------------------------------------------
-var accessToken = [];
+var dataAccessToken = [];
 
 // 生成access_token
 exports.generateAccessToken = function (userId, clientId, callback) {
   var code = utils.randomString(20);
-  accessToken[code] = {
+  dataAccessToken[code] = {
     clientId: clientId,
     userId: userId
   };
@@ -80,8 +80,36 @@ exports.generateAccessToken = function (userId, clientId, callback) {
 };
 
 // 查询access_token的信息
-utils.getAccessTokenInfo = function (token, callback) {
-  var info = accessToken[token];
+exports.getAccessTokenInfo = function (token, callback) {
+  var info = dataAccessToken[token];
   if (!info) return callback(utils.invalidParameterError('token'));
   callback(null, info);
+};
+
+//------------------------------------------------------------------------------
+
+var faker = require('faker');
+// 设置语言为简体中文
+faker.locale = 'zh_CN';
+
+var dataArticles = [];
+var ARTICLE_NUM = 100;
+
+// 生成文章列表
+for (var i = 0; i < ARTICLE_NUM; i++) {
+  dataArticles.push({
+    id: faker.random.uuid(),
+    author: faker.name.findName(),
+    title: faker.lorem.sentence(),
+    createdAt: faker.date.past(),
+    content: faker.lorem.paragraphs(10)
+  });
+}
+
+// 查询文章列表的函数
+exports.queryArticles = function (query, callback) {
+  query.$skip = utils.defaultNumber(query.$skip, 0);
+  query.$limit = utils.defaultNumber(query.$limit, 10);
+  // 返回指定范围的文章数据
+  callback(null, dataArticles.slice(query.$skip, query.$skip + query.$limit));
 };

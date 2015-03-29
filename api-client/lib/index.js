@@ -25,6 +25,7 @@ function addQueryParamsToUrl (url, params) {
 var API_URL = 'http://127.0.0.1:3000';
 var API_OAUTH2_AUTHORIZE = API_URL + '/OAuth2/authorize';
 var API_OAUTH2_ACCESS_TOKEN = API_URL + '/OAuth2/access_token';
+var API_ARTICLES = API_URL + '/api/v1/articles.json';
 
 
 function APIClient (options) {
@@ -57,7 +58,7 @@ APIClient.prototype._request = function (method, url, params, callback) {
     url: url
   };
   if (method === 'GET' || method === 'HEAD') {
-    requestParams.query = params;
+    requestParams.qs = params;
   } else {
     requestParams.formData = params;
   }
@@ -99,5 +100,9 @@ APIClient.prototype.requestAccessToken = function (code, callback) {
   });
 };
 
+// 查询文章列表
+APIClient.prototype.getArticles = function (params, callback) {
+  this._request('get', API_ARTICLES, params, callback);
+};
 
 module.exports = APIClient;

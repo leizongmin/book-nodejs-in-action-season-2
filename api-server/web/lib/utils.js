@@ -21,6 +21,12 @@ utils.addQueryParamsToUrl = function (url, params) {
   return formatUrl(info);
 };
 
+// 如果数值不大于0则返回默认值
+utils.defaultNumber = function (n, d) {
+  n = Number(n);
+  return n > 0 ? n : d;
+};
+
 // 创建出错对象，code=出错代码，msg=出错描述信息
 utils.createApiError = function (code, msg) {
   var err = new Error(msg);
@@ -42,4 +48,9 @@ utils.redirectUriNotMatchError = function (url) {
 // 参数错误
 utils.invalidParameterError = function (name) {
   return utils.createApiError('INVALID_PARAMETER', '参数`' + name + '`不正确');
+};
+
+// 超出请求频率限制错误
+utils.outOfRateLimitError = function () {
+  return utils.createApiError('OUT_OF_RATE_LIMIT', '超出请求频率限制');
 };
