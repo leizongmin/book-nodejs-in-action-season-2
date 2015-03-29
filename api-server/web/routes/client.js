@@ -23,7 +23,6 @@ exports.authCallback = function (req, res, next) {
     if (err) return res.send(err);
 
     // 显示授权成功页面
-    //res.end('获取授权成功，授权码是：' + ret.access_token);
     res.redirect('/example');
   });
 };
@@ -35,6 +34,9 @@ exports.example = function (req, res, next) {
   // 请求获取文章列表
   client.getArticles(req.query, function (err, ret) {
     if (err) return res.send(err);
-    res.send(ret);
+    res.send({
+      accessToken: client._accessToken,
+      result: ret
+    });
   });
 };
