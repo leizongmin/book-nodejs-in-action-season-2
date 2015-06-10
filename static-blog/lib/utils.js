@@ -6,10 +6,12 @@
 
 var path = require('path');
 var fs = require('fs');
+var open = require('open');
 var mkdirp = require('mkdirp');
-var swig = require('swig');
 var rd = require('rd');
 var fsExtra = require('fs-extra');
+var swig = require('swig');
+swig.setDefaults({cache: false});
 var MarkdownIt = require('markdown-it');
 var md = new MarkdownIt({
   html: true,
@@ -17,6 +19,7 @@ var md = new MarkdownIt({
 });
 var utils = exports;
 
+utils.open = open;
 
 utils.getSiteDir = function (dir) {
   return path.resolve(dir || '.');
@@ -33,7 +36,7 @@ utils.emptyDir = function (dir) {
 };
 
 utils.readdir = function (dir) {
-  return rd.readFileFilterSync(dir, /\.(md|markdown)/i);
+  return rd.readFileFilterSync(dir, /\.(md|markdown)/);
 };
 
 utils.readFile = function (file) {
@@ -42,8 +45,8 @@ utils.readFile = function (file) {
 };
 
 utils.writeFile = function (file, data) {
-  console.log('write file: %s', file);
   utils.mkdir(path.dirname(file));
+  console.log('write file: %s', file);
   fs.writeFileSync(file, data);
 };
 
@@ -83,9 +86,16 @@ utils.parseSourceContent = function (data) {
   return info;
 };
 
-utils.basename = function (dir, filename) {
-  var name = filename.slice(dir.length + 1);
+utils.stripExtname = function (name) {
   var i = 0 - path.extname(name).length;
   if (i === 0) i = name.length;
   return name.slice(0, i);
+};
+
+utils.extname = function (name) {
+  return path.extname(name);
+};
+
+utils.basename = function (dir, filename) {
+  return utils.stripExtname(filename.slice(dir.length + 1));
 };

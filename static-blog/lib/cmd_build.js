@@ -4,8 +4,6 @@
  * @author Zongmin Lei <leizongmin@gmail.com>
  */
 
-var path = require('path');
-var mkdirp = require('mkdirp');
 var utils = require('./utils');
 var site = require('./site');
 

@@ -5,6 +5,7 @@
  */
 
 var path = require('path');
+var fs = require('fs');
 var utils = require('./utils');
 var site = exports;
 
@@ -26,13 +27,24 @@ site.getPosts = function () {
   });
 };
 
+site.resolvePostSourcePath = function (name) {
+  var suffix = ['', '.md', '.markdown'];
+  for (var i = 0; i < suffix.length; i++) {
+    var s = suffix[i];
+    var f = site.filePath('_posts', name + s);
+    if (fs.existsSync(f)) return f;
+  }
+};
+
 site.getPost = function (name) {
-  var post = utils.parseSourceContent(utils.readFile(site.filePath('_posts', name)));
-  post.timestamp = new Date(post.date);
+  var sourcePath = site.resolvePostSourcePath(name);
+  var post = utils.parseSourceContent(utils.readFile(sourcePath));
+  post.timestamp = new Date(post.date).getTime();
   post.content = utils.markdown(post.source);
   post.filename = utils.basename(site.filePath('_posts'), name) + '.html';
   post.url = '/posts/' + post.filename;
   post.localPath = site.filePath('posts', post.filename);
+  post.sourcePath = sourcePath;
   post.render = function () {
     var data = {
       config: site.getConfig(),
