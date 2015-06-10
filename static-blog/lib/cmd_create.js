@@ -12,13 +12,15 @@ module.exports = function (dir) {
 
   dir = utils.getSiteDir(dir);
 
-  function mkdir (name) {
-    utils.mkdir(path.resolve(dir, name));
+  function makeDir (name) {
+    utils.makeDir(path.resolve(dir, name));
   }
 
-  mkdir(dir, '_layouts');
-  mkdir(dir, '_posts');
-  mkdir(dir, 'assets');
-  mkdir(dir, 'posts');
+  makeDir('_layouts');
+  makeDir('_posts');
+  makeDir('assets');
+  makeDir('posts');
+
+  utils.copyDir(path.resolve(__dirname, 'tpl'), dir);
 
 };

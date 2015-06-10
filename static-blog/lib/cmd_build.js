@@ -16,7 +16,7 @@ module.exports = function (dir, options) {
   utils.emptyDir(targetDir);
 
   // 渲染文章
-  utils.readdir(sourceDir).forEach(function (name) {
+  utils.readDir(sourceDir).forEach(function (name) {
     var post = site.getPost(name);
     utils.writeFile(post.localPath, post.render());
   });

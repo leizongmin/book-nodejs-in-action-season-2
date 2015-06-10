@@ -20,7 +20,7 @@ site.getConfig = function () {
 };
 
 site.getPosts = function () {
-  return utils.readdir(site.filePath('_posts')).map(function (name) {
+  return utils.readDir(site.filePath('_posts')).map(function (name) {
     return site.getPost(name);
   }).sort(function (a, b) {
     return b.timestamp - a.timestamp;

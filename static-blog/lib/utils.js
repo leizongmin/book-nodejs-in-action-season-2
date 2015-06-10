@@ -25,8 +25,13 @@ utils.getSiteDir = function (dir) {
   return path.resolve(dir || '.');
 };
 
-utils.mkdir = function (dir) {
-  console.log('mkdir: %s', dir);
+utils.copyDir = function (src, dest) {
+  console.log('copyDir: %s => %s', src, dest);
+  fsExtra.copySync(src, dest);
+};
+
+utils.makeDir = function (dir) {
+  console.log('makeDir: %s', dir);
   mkdirp.sync(dir);
 };
 
@@ -35,7 +40,7 @@ utils.emptyDir = function (dir) {
   fsExtra.emptyDirSync(dir);
 };
 
-utils.readdir = function (dir) {
+utils.readDir = function (dir) {
   return rd.readFileFilterSync(dir, /\.(md|markdown)/);
 };
 
@@ -45,7 +50,7 @@ utils.readFile = function (file) {
 };
 
 utils.writeFile = function (file, data) {
-  utils.mkdir(path.dirname(file));
+  utils.makeDir(path.dirname(file));
   console.log('write file: %s', file);
   fs.writeFileSync(file, data);
 };
