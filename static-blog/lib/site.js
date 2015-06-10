@@ -19,24 +19,36 @@ site.getConfig = function () {
 };
 
 site.getPosts = function () {
-  var posts = utils.readdir(site.filePath('_posts'));
-  return posts.map(function (name) {
+  return utils.readdir(site.filePath('_posts')).map(function (name) {
     return site.getPost(name);
+  }).sort(function (a, b) {
+    return b.timestamp - a.timestamp;
   });
 };
 
 site.getPost = function (name) {
-  var ret = utils.parseSourceContent(utils.readFile(site.filePath('_posts', name)));
-  ret.info.content = utils.markdown(ret.content);
-  return ret.info;
+  var post = utils.parseSourceContent(utils.readFile(site.filePath('_posts', name)));
+  post.timestamp = new Date(post.date);
+  post.content = utils.markdown(post.source);
+  post.filename = utils.basename(site.filePath('_posts'), name) + '.html';
+  post.url = '/posts/' + post.filename;
+  post.localPath = site.filePath('posts', post.filename);
+  post.render = function () {
+    var data = {
+      config: site.getConfig(),
+      post: post
+    };
+    var layout = (data.post.layout || 'post') + '.html';
+    return utils.renderFile(site.filePath('_layouts', layout), data);
+  };
+  return post;
 };
 
-site.renderPost = function (name) {
+site.renderIndex = function () {
   var data = {
     config: site.getConfig(),
-    posts: site.getPosts(),
-    post: site.getPost(name)
+    posts: site.getPosts()
   };
-  var layout = (data.post.layout || 'post') + '.html';
+  var layout = 'index.html';
   return utils.renderFile(site.filePath('_layouts', layout), data);
 };

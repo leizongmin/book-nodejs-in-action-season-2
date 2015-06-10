@@ -12,10 +12,18 @@ var site = require('./site');
 module.exports = function (dir, options) {
 
   site.dir = utils.getSiteDir(dir);
-  
-  utils.readdir(site.filePath('_posts')).forEach(function (name) {
-    var content = site.renderPost(name);
-    utils.writeFile(site.filePath('posts', utils.basename(name) + '.html'), content);
+
+  var sourceDir = site.filePath('_posts');
+  var targetDir = site.filePath('posts');
+  utils.emptyDir(targetDir);
+
+  // 渲染文章
+  utils.readdir(sourceDir).forEach(function (name) {
+    var post = site.getPost(name);
+    utils.writeFile(post.localPath, post.render());
   });
- 
+
+  // 渲染列表
+  utils.writeFile(site.filePath('index.html'), site.renderIndex());
+
 };

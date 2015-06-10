@@ -11,10 +11,14 @@ var utils = require('./utils');
 module.exports = function (dir) {
 
   dir = utils.getSiteDir(dir);
- 
-  utils.mkdir(dir, '_layouts');
-  utils.mkdir(dir, '_posts');
-  utils.mkdir(dir, 'assets');
-  utils.mkdir(dir, 'posts');
-  
+
+  function mkdir (name) {
+    utils.mkdir(path.resolve(dir, name));
+  }
+
+  mkdir(dir, '_layouts');
+  mkdir(dir, '_posts');
+  mkdir(dir, 'assets');
+  mkdir(dir, 'posts');
+
 };

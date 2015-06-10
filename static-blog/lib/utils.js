@@ -8,6 +8,8 @@ var path = require('path');
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 var swig = require('swig');
+var rd = require('rd');
+var fsExtra = require('fs-extra');
 var MarkdownIt = require('markdown-it');
 var md = new MarkdownIt({
   html: true,
@@ -20,13 +22,18 @@ utils.getSiteDir = function (dir) {
   return path.resolve(dir || '.');
 };
 
-utils.mkdir = function (dir, name) {
-  console.log('mkdir: %s', name);
-  mkdirp.sync(path.resolve(dir, name));
+utils.mkdir = function (dir) {
+  console.log('mkdir: %s', dir);
+  mkdirp.sync(dir);
+};
+
+utils.emptyDir = function (dir) {
+  console.log('emptyDir: %s', dir);
+  fsExtra.emptyDirSync(dir);
 };
 
 utils.readdir = function (dir) {
-  return fs.readdirSync(dir);
+  return rd.readFileFilterSync(dir, /\.(md|markdown)/i);
 };
 
 utils.readFile = function (file) {
@@ -36,6 +43,7 @@ utils.readFile = function (file) {
 
 utils.writeFile = function (file, data) {
   console.log('write file: %s', file);
+  utils.mkdir(path.dirname(file));
   fs.writeFileSync(file, data);
 };
 
@@ -71,11 +79,12 @@ utils.parseSourceContent = function (data) {
       });
     }
   }
-  return {info: info, content: data};
+  info.source = data;
+  return info;
 };
 
-utils.basename = function (name) {
-  name = path.basename(name);
+utils.basename = function (dir, filename) {
+  var name = filename.slice(dir.length + 1);
   var i = 0 - path.extname(name).length;
   if (i === 0) i = name.length;
   return name.slice(0, i);
