@@ -10,6 +10,7 @@ var site = require('./site');
 module.exports = function (dir, options) {
 
   site.dir = utils.getSiteDir(dir);
+  site.outputDir = options.output || '.';
 
   var sourceDir = site.filePath('_posts');
   var targetDir = site.filePath('posts');

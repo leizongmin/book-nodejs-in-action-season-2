@@ -15,6 +15,12 @@ site.filePath = function () {
   return path.resolve.apply(path, args);
 };
 
+site.outputPath = function () {
+  var args = Array.prototype.slice.call(arguments);
+  args.unshift(utils.getSiteDir(site.outputDir));
+  return path.resolve.apply(path, args);
+};
+
 site.getConfig = function () {
   return JSON.parse(utils.readFile(site.filePath('config.json')));
 };
@@ -43,7 +49,7 @@ site.getPost = function (name) {
   post.content = utils.markdown(post.source);
   post.filename = utils.basename(site.filePath('_posts'), name) + '.html';
   post.url = '/posts/' + post.filename;
-  post.localPath = site.filePath('posts', post.filename);
+  post.localPath = site.outputPath('posts', post.filename);
   post.sourcePath = sourcePath;
   post.render = function () {
     var data = {
