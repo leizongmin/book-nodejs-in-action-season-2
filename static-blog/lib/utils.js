@@ -1,74 +1,29 @@
-/**
- * 静态博客工具
- *
- * @author Zongmin Lei <leizongmin@gmail.com>
- */
-
 var path = require('path');
 var fs = require('fs');
-var open = require('open');
-var mkdirp = require('mkdirp');
-var rd = require('rd');
-var fsExtra = require('fs-extra');
-var swig = require('swig');
-swig.setDefaults({cache: false});
 var MarkdownIt = require('markdown-it');
 var md = new MarkdownIt({
   html: true,
   langPrefix: 'code-',
 });
-var utils = exports;
+var swig = require('swig');
+swig.setDefaults({cache: false});
+var rd = require('rd');
 
-utils.open = open;
 
-utils.getSiteDir = function (dir) {
-  return path.resolve(dir || '.');
-};
+// 去掉文件名中的扩展名
+function stripExtname (name) {
+  var i = 0 - path.extname(name).length;
+  if (i === 0) i = name.length;
+  return name.slice(0, i);
+}
 
-utils.copyDir = function (src, dest) {
-  console.log('copyDir: %s => %s', src, dest);
-  fsExtra.copySync(src, dest);
-};
+// 将Markdown转换为HTML
+function markdownToHTML (content) {
+  return md.render(content || '');
+}
 
-utils.makeDir = function (dir) {
-  console.log('makeDir: %s', dir);
-  mkdirp.sync(dir);
-};
-
-utils.emptyDir = function (dir) {
-  console.log('emptyDir: %s', dir);
-  fsExtra.emptyDirSync(dir);
-};
-
-utils.readDir = function (dir) {
-  return rd.readFileFilterSync(dir, /\.(md|markdown)/);
-};
-
-utils.readFile = function (file) {
-  console.log('read file: %s', file);
-  return fs.readFileSync(file).toString();
-};
-
-utils.writeFile = function (file, data) {
-  utils.makeDir(path.dirname(file));
-  console.log('write file: %s', file);
-  fs.writeFileSync(file, data);
-};
-
-utils.markdown = function (data) {
-  return md.render(data);
-};
-
-utils.renderFile = function (file, data) {
-  console.log('render file: %s', file);
-  return swig.render(utils.readFile(file), {
-    filename: file,
-    autoescape: false,
-    locals: data
-  });
-};
-
-utils.parseSourceContent = function (data) {
+// 解析文章内容
+function parseSourceContent (data) {
   var split = '---\n';
   var i = data.indexOf(split);
   var info = {};
@@ -89,18 +44,73 @@ utils.parseSourceContent = function (data) {
   }
   info.source = data;
   return info;
-};
+}
 
-utils.stripExtname = function (name) {
-  var i = 0 - path.extname(name).length;
-  if (i === 0) i = name.length;
-  return name.slice(0, i);
-};
+// 渲染模板
+function renderFile (file, data) {
+  return swig.render(fs.readFileSync(file).toString(), {
+    filename: file,
+    autoescape: false,
+    locals: data
+  });
+}
 
-utils.extname = function (name) {
-  return path.extname(name);
-};
+// 遍历所有文章
+function eachSourceFile (sourceDir, callback) {
+  rd.eachFileFilterSync(sourceDir, /\.md$/, callback);
+}
 
-utils.basename = function (dir, filename) {
-  return utils.stripExtname(filename.slice(dir.length + 1));
-};
+// 渲染文章
+function renderPost (dir, file) {
+  var content = fs.readFileSync(file).toString();
+  var post = parseSourceContent(content.toString());
+  post.content = markdownToHTML(post.source);
+  post.layout = post.layout || 'post';
+  var config = loadConfig(dir);
+  var layout = path.resolve(dir, '_layout', post.layout + '.html');
+  var html = renderFile(layout, {
+    config: config,
+    post: post
+  });
+  return html;
+}
+
+// 渲染文章列表
+function renderIndex (dir) {
+  var list = [];
+  var sourceDir = path.resolve(dir, '_posts');
+  eachSourceFile(sourceDir, function (f, s) {
+    var source = fs.readFileSync(f).toString();
+    var post = parseSourceContent(source);
+    post.timestamp = new Date(post.date);
+    post.url = '/posts/' + stripExtname(f.slice(sourceDir.length + 1)) + '.html';
+    list.push(post);
+  });
+
+  list.sort(function (a, b) {
+    return b.timestamp - a.timestamp;
+  });
+
+  var config = loadConfig(dir);
+  var layout = path.resolve(dir, '_layout', 'index.html');
+  var html = renderFile(layout, {
+    config: config,
+    posts: list
+  });
+  return html;
+}
+
+// 读取配置文件
+function loadConfig (dir) {
+  var content = fs.readFileSync(path.resolve(dir, 'config.json')).toString();
+  var data = JSON.parse(content);
+  return data;
+}
+
+
+// 输出函数
+exports.renderPost = renderPost;
+exports.renderIndex = renderIndex;
+exports.stripExtname = stripExtname;
+exports.eachSourceFile = eachSourceFile;
+exports.loadConfig = loadConfig;

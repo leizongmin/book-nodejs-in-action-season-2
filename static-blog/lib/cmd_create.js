@@ -1,26 +1,38 @@
-/**
- * 静态博客工具
- *
- * @author Zongmin Lei <leizongmin@gmail.com>
- */
-
 var path = require('path');
-var mkdirp = require('mkdirp');
 var utils = require('./utils');
+var fse = require('fs-extra');
+var moment = require('moment');
 
 module.exports = function (dir) {
+  dir = dir || '.';
 
-  dir = utils.getSiteDir(dir);
+  // 创建基本目录
+  fse.mkdirsSync(path.resolve(dir, '_layout'));
+  fse.mkdirsSync(path.resolve(dir, '_posts'));
+  fse.mkdirsSync(path.resolve(dir, 'assets'));
+  fse.mkdirsSync(path.resolve(dir, 'posts'));
 
-  function makeDir (name) {
-    utils.makeDir(path.resolve(dir, name));
-  }
+  // 复制模板文件
+  var tplDir = path.resolve(__dirname, '../tpl');
+  fse.copySync(tplDir, dir);
 
-  makeDir('_layouts');
-  makeDir('_posts');
-  makeDir('assets');
-  makeDir('posts');
+  // 创建第一篇文章
+  newPost(dir, 'hello, world', '这是我的第一篇文章');
 
-  utils.copyDir(path.resolve(__dirname, 'tpl'), dir);
-
+  console.log('OK');
 };
+
+// 创建一篇文章
+function newPost (dir, title, content) {
+  var data = [
+    '---',
+    'title: ' + title,
+    'date: ' + moment().format('YYYY-MM-DD'),
+    '---',
+    '',
+    content
+  ].join('\n');
+  var name = moment().format('YYYY-MM') + '/hello-world.md';
+  var file = path.resolve(dir, '_posts', name);
+  fse.outputFileSync(file, data);
+}

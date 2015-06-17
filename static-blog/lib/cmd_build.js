@@ -1,28 +1,28 @@
-/**
- * 静态博客工具
- *
- * @author Zongmin Lei <leizongmin@gmail.com>
- */
-
+var path = require('path');
 var utils = require('./utils');
-var site = require('./site');
+var fse = require('fs-extra');
 
 module.exports = function (dir, options) {
+  dir = dir || '.';
+  var outputDir = path.resolve(options.output || dir);
 
-  site.dir = utils.getSiteDir(dir);
-  site.outputDir = options.output || '.';
+  // 写入文件
+  function outputFile (file, content) {
+    console.log('生成页面: %s', file.slice(outputDir.length + 1));
+    fse.outputFileSync(file, content);
+  }
 
-  var sourceDir = site.filePath('_posts');
-  var targetDir = site.filePath('posts');
-  utils.emptyDir(targetDir);
-
-  // 渲染文章
-  utils.readDir(sourceDir).forEach(function (name) {
-    var post = site.getPost(name);
-    utils.writeFile(post.localPath, post.render());
+  // 生成文章内容页面
+  var sourceDir = path.resolve(dir, '_posts');
+  utils.eachSourceFile(sourceDir, function (f, s) {
+    var html = utils.renderPost(dir, f);
+    var relativeFile = utils.stripExtname(f.slice(sourceDir.length + 1)) + '.html';
+    var file = path.resolve(outputDir, 'posts', relativeFile);
+    outputFile(file, html);
   });
 
-  // 渲染列表
-  utils.writeFile(site.filePath('index.html'), site.renderIndex());
-
+  // 生成首页
+  var htmlIndex = utils.renderIndex(dir);
+  var fileIndex = path.resolve(outputDir, 'index.html');
+  outputFile(fileIndex, htmlIndex);
 };
