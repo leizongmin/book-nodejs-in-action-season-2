@@ -39,6 +39,7 @@ exports.extendAPIOutput = function (req, res, next) {
 
     // 取得请求的数据格式
     var type = path.extname(parseUrl(req.url).pathname);
+    if (!type) type = '.' + req.accepts(['json', 'xml']);
     switch (type) {
       case '.xml':
         return res.xml(data);

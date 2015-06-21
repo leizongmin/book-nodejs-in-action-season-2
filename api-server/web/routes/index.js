@@ -37,4 +37,9 @@ module.exports = function (app) {
     middlewares.generateRateLimiter(generateHourRateLimiterKey('/api/v1/articles'), 10000),
     api.getArticles);
 
+  app.get('/api/v1/articles',
+    middlewares.verifyAccessToken,
+    middlewares.generateRateLimiter(generateHourRateLimiterKey('/api/v1/articles'), 10000),
+    api.getArticles);
+
 };

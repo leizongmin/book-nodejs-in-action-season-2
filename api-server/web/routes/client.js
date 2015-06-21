@@ -20,9 +20,10 @@ exports.requestAuth = function (req, res, next) {
 
 exports.authCallback = function (req, res, next) {
   client.requestAccessToken(req.query.code, function (err, ret) {
-    if (err) return res.send(err);
+    if (err) return res.send(err.toString());
 
     // 显示授权成功页面
+    console.log(ret);
     res.redirect('/example');
   });
 };
@@ -33,7 +34,7 @@ exports.example = function (req, res, next) {
 
   // 请求获取文章列表
   client.getArticles(req.query, function (err, ret) {
-    if (err) return res.send(err);
+    if (err) return res.send(err.toString());
     res.send({
       accessToken: client._accessToken,
       result: ret
