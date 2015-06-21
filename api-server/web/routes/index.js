@@ -22,13 +22,16 @@ module.exports = function (app) {
   app.get('/example/auth/callback', client.authCallback);
   app.get('/example', client.example);
 
-  // 提供的API列表
+  // 提供的API列表 --------------------------------------------------------------
   var api = require('./api');
+
+  // 生成请求限制key
   function generateHourRateLimiterKey (api) {
     return function (source) {
       return utils.md5(api, source) + ':' + utils.date('YmdH');
     };
   }
+
   app.get('/api/v1/articles.*',
     middlewares.verifyAccessToken,
     middlewares.generateRateLimiter(generateHourRateLimiterKey('/api/v1/articles'), 10000),
