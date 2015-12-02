@@ -28,7 +28,7 @@ module.exports = function (app) {
   // 生成请求限制key
   function generateHourRateLimiterKey (api) {
     return function (source) {
-      return utils.md5(api, source) + ':' + utils.date('YmdH');
+      return utils.md5(api + source) + ':' + utils.date('YmdH');
     };
   }
 
