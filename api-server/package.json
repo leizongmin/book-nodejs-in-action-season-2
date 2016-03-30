@@ -22,6 +22,7 @@
     "lei-utils": "^1.0.5",
     "redis": "^0.12.1",
     "sails-disk": "^0.10.7",
-    "waterline": "^0.10.18"
+    "waterline": "^0.10.18",
+    "request": ""
   }
 }
