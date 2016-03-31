@@ -1,12 +1,12 @@
 /**
  * 简单API服务器
- *
+ * 这是个简单服务器么，这就是一系列的connect中间件
  * @author Zongmin Lei <leizongmin@gmail.com>
  */
 
 var path = require('path');
 var parseUrl = require('url').parse;
-var redis = require('redis');
+var redis = require('redis'); // 连接redis
 var bodyParser = require('body-parser');
 var connect = require('connect');
 var multipart = require('connect-multiparty');
@@ -19,7 +19,7 @@ var database = require('./database');
 exports.ensureLogin = function (req, res, next) {
   // 这里直接设置用户ID=glen
   req.loginUserId = 'glen';
-  next();
+  next(); // 跳转到下一个符合的路由
 };
 
 
@@ -32,15 +32,16 @@ exports.postBody = postBody;
 
 
 // 扩展 res.apiSuccess() 和 res.apiError()
+// response对象是connect库的
 exports.extendAPIOutput = function (req, res, next) {
 
   // 输出数据
   function output (data) {
 
     // 取得请求的数据格式
-    var type = path.extname(parseUrl(req.url).pathname);
-    if (!type) type = '.' + req.accepts(['json', 'xml']);
-    switch (type) {
+    var type = path.extname(parseUrl(req.url).pathname);  // 获取扩展名
+    if (!type) type = '.' + req.accepts(['json', 'xml']); // 设置接受扩展名json/xml
+    switch (type) { // 处理xml/json的数据
       case '.xml':
         return res.xml(data);
       default:
@@ -92,14 +93,15 @@ exports.apiErrorHandle = function (err, req, res, next) {
 
 // 验证access_token
 exports.verifyAccessToken = function (req, res, next) {
-  var accessToken = (req.body && req.body.access_token) || req.query.access_token;
-  var source = (req.body && req.body.source) || req.query.source;
+  var accessToken = (req.body && req.body.access_token) || req.query.access_token; // 获取access_token
+  var source = (req.body && req.body.source) || req.query.source; // 拿到访问资源
 
   // 检查参数
-  if (!accessToken) return next(utils.missingParameterError('access_token'));
-  if (!source) return next(utils.missingParameterError('source'));
+  if (!accessToken) return next(utils.missingParameterError('access_token')); // 缺少参数
+  if (!source) return next(utils.missingParameterError('source'));  // 缺少参数
 
   // 查询access_token的信息
+  // 数据库里拿到AccessTokenInfo，然后对比clientId是不惠一致的
   database.getAccessTokenInfo(accessToken, function (err, tokenInfo) {
     if (err) return next(err);
 
@@ -109,7 +111,7 @@ exports.verifyAccessToken = function (req, res, next) {
     }
 
     // 保存当前access_token的详细信息
-    req.accessTokenInfo = tokenInfo;
+    req.accessTokenInfo = tokenInfo;  //从数据库获取的token
 
     next();
   });
@@ -119,7 +121,7 @@ exports.verifyAccessToken = function (req, res, next) {
 //------------------------------------------------------------------------------
 
 // 连接的redis
-var redisClient = redis.createClient();
+var redisClient = redis.createClient('32768', '192.168.99.100', {no_ready_check: true});
 
 // 生成检测请求频率的中间件
 exports.generateRateLimiter = function (getKey, limit) {
